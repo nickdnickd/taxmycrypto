@@ -1,0 +1,10 @@
+"You can use this transaction report to inform your likely tax obligations. For US customers, Sells, Converts, and Rewards Income, and Coinbase Earn transactions are taxable events. For final tax obligations, please consult your tax advisor."
+
+
+
+Transactions
+User,user@mail.com,asdf1234asdf1234asdf1234
+
+Timestamp,Transaction Type,Asset,Quantity Transacted,USD Spot Price at Transaction,USD Subtotal,USD Total (inclusive of fees),USD Fees,Notes
+2020-01-16T16:21:08Z,Buy,ETH,1.0000000,600.01,600.01,602.02,2.01,Bought 1 ETH for $602.02 USD
+2020-02-03T01:56:04Z,Sell,ETH,1.00000,700.02,700.02,702.03,2.01,Sold 1 ETH for $702.03 USD
