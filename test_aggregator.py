@@ -10,3 +10,4 @@ def test_simple_tx_history():
 # TODO create WAY more tests around using differnt tokens
 # Also consider testing lower level functions so that we
 # can easier parametrize the data
+# Also test "next year" usability

@@ -5,7 +5,8 @@
    https://cryptotrader.tax/blog/the-traders-guide-to-cryptocurrency-taxes
 """
 
-from typing import Tuple
+from os import write
+from typing import List, Tuple
 from dataclasses import dataclass
 from typing import Optional
 import logging
@@ -71,6 +72,7 @@ class CoinbaseTransaction:
     usd_fees: float
 
     # How many of this asset did we attribute to profit
+    BASIS_COLUMN_NAME = "quantity_attributed_to_profit"
     quantity_attributed_to_profit: float = 0.0
 
     def cost_basis_usd(self, quantity_considered) -> float:
@@ -99,11 +101,22 @@ class CoinbaseTransaction:
         )
 
 
-def read_csv(csv_path: str) -> Optional[pd.DataFrame]:
-    """Return a dataframe for processing, ensure we process the correct datetime"""
+def read_csv(csv_path: str) -> Tuple[pd.DataFrame, List[str]]:
+    """Return a dataframe for processing"""
 
     with open(csv_path) as csvfile:
-        return pd.read_csv(csvfile, header=3, parse_dates=[0])
+        file_df = pd.read_csv(csvfile, header=3, parse_dates=[0])
+        csvfile.seek(0)
+        file_head = [next(csvfile) for x in range(7)]
+
+        return file_df, file_head
+
+
+def write_csv(file_path: str, output_df: pd.DataFrame, file_header=List[str]):
+
+    with open(file_path, "w") as csvfile:
+        csvfile.writelines(file_header)
+        output_df.to_csv(csvfile, index=False)
 
 
 def strategy_to_sort_values(purchase_df: pd.DataFrame, strategy: Strategy):
@@ -156,9 +169,13 @@ def calculate_proceeds(
     """Highest In, First Out. Show minimum profits possible.
     Mark historical transactactions so that this script can be used later."""
     output_df = pd.DataFrame(columns=CryptoProceeds.csv_header)
-    buy_df.insert(0, "quantity_attributed_to_profit", 0)
+    basis_col = CoinbaseTransaction.BASIS_COLUMN_NAME
 
-    logging.debug(buy_df.to_string())
+    if basis_col not in buy_df:
+        # Record what crypto we used as a bases for profit
+        # If this column already exists it means we've used this
+        # file for a previous tax year.
+        buy_df.insert(len(buy_df.columns) - 5, basis_col, 0.0)
 
     for _, row in sell_df.iterrows():
         logging.info(
@@ -179,8 +196,10 @@ def calculate_proceeds(
             )
 
             # Count this quantity of crypto towards profit
-
-            same_type_bought.loc[tx_idx, "quantity_attributed_to_profit"] = (
+            same_type_bought.at[tx_idx, basis_col] = (
+                crypto_to_attribute + highest_asset_tx.quantity_attributed_to_profit
+            )
+            buy_df.at[tx_idx, basis_col] = (
                 crypto_to_attribute + highest_asset_tx.quantity_attributed_to_profit
             )
 
@@ -236,7 +255,7 @@ def summarize_total_profit_loss(proceeds_df: pd.DataFrame):
 
 
 def process_file(coinbase_filepath: str):
-    tx_df = read_csv(coinbase_filepath)
+    tx_df, file_head = read_csv(coinbase_filepath)
 
     # Get a copy of all sell transactions in 2020
     # TODO support all taxable events
@@ -253,8 +272,16 @@ def process_file(coinbase_filepath: str):
 
     summarize_total_profit_loss(output_df)
 
-    # TODO actually write the proceeds to a csv,
-    # TODO record which input transactions were used for cost basis
+    # This is the file to upload to TurboTax
+    output_df.round(2).to_csv(
+        coinbase_filepath.replace(".csv", "_proceeds.csv"),
+        index=False,
+    )
+
+    # I don't know exactly what to do with this yet
+    write_csv(
+        coinbase_filepath.replace(".csv", "_cost_basis_source.csv"), buy_df, file_head
+    )
 
     return output_df
 
