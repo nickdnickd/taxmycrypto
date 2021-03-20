@@ -5,10 +5,8 @@
    https://cryptotrader.tax/blog/the-traders-guide-to-cryptocurrency-taxes
 """
 
-from os import write
 from typing import List, Tuple
 from dataclasses import dataclass
-from typing import Optional
 import logging
 import argparse
 import pandas as pd
@@ -289,12 +287,12 @@ def process_file(coinbase_filepath: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Process a 2020 coinbase file for 2020 turbo tax.\n"
-        "Note: this script does not yet cover conversions."
+        "Note: this script does not yet cover conversions.\n"
+        "This is currently using the Highest In- First out strategy"
     )
     parser.add_argument("coinbase_file", help="the path to the coinbase csv file")
 
     # TODO make year and coin strategy parameters
-    # default year idea: this year minus one
 
     args = parser.parse_args()
 

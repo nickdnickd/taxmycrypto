@@ -1,4 +1,4 @@
-# Single Crypto Tax Aggregator
+# Simple Crypto Tax Aggregator
 
 This script reads the CSV file produced by Coinbase in 2020 and shows how one could calculate proceeds using past purchases as cost basis.
 
