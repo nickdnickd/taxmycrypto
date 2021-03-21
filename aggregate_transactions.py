@@ -257,6 +257,7 @@ def process_file(coinbase_filepath: str):
 
     # Get a copy of all sell transactions in 2020
     # TODO support all taxable events
+    # Some ideas: Income could just be the same proceeds without cost basis?
     date_mask = get_date_mask_for_year(tx_df, 2020)
     sell_df = tx_df.loc[
         (tx_df["Transaction Type"] == TransactionType.SELL.value) & date_mask
@@ -276,9 +277,12 @@ def process_file(coinbase_filepath: str):
         index=False,
     )
 
-    # I don't know exactly what to do with this yet
+    # Reassemble the original dataframe with the new attribution column to be reused.
+    # TODO figure out what to do with year-over-year transactions
     write_csv(
-        coinbase_filepath.replace(".csv", "_cost_basis_source.csv"), buy_df, file_head
+        coinbase_filepath.replace(".csv", "_cost_basis_source.csv"),
+        pd.concat([buy_df, sell_df]),
+        file_head,
     )
 
     return output_df
