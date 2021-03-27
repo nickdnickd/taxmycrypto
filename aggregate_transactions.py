@@ -98,6 +98,15 @@ class CoinbaseTransaction:
             usd_fees=df["USD Fees"],
         )
 
+    def to_df_row(self):
+        self_df = pd.DataFrame([self])
+
+        self_df.columns = [
+            CoinbaseTransaction.TO_COINBASE_COLS.get(column, column)
+            for column in self_df.columns
+        ]
+        return self_df
+
     TO_COINBASE_COLS = {
         "timestamp": "Timestamp",
         "transaction_type": "Transaction Type",
