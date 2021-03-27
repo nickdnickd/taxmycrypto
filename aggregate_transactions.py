@@ -74,11 +74,11 @@ class CoinbaseTransaction:
     quantity_attributed_to_profit: float = 0.0
 
     def cost_basis_usd(self, quantity_considered) -> float:
-        """Fees included amount spend
-        The reason we don't do subtotal is because part of the quantity
-
-        NOTE ask about portion of fees. Like if I attribute a portion of my buy
-        transcation, do I split up the fees for cost basis?"""
+        """Cost basis is how much we had to spend to acquire this asset
+        Includes the list price of the asset plus any fees.
+        Since assets are divisible, we attribute the fraction of the fees
+        use to buy this assset.
+        """
 
         return quantity_considered * (
             self.usd_spot_price_at_transaction
@@ -97,6 +97,17 @@ class CoinbaseTransaction:
             usd_total=df["USD Total (inclusive of fees)"],
             usd_fees=df["USD Fees"],
         )
+
+    TO_COINBASE_COLS = {
+        "timestamp": "Timestamp",
+        "transaction_type": "Transaction Type",
+        "asset": "Asset",
+        "quantity_transacted": "Quantity Transacted",
+        "usd_spot_price_at_transaction": "USD Spot Price at Transaction",
+        "usd_subtotal": "USD Subtotal",
+        "usd_total": "USD Total (inclusive of fees)",
+        "usd_fees": "USD Fees",
+    }
 
 
 def read_csv(csv_path: str) -> Tuple[pd.DataFrame, List[str]]:
